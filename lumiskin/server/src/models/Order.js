@@ -1,0 +1,3 @@
+import mongoose from 'mongoose';
+const schema=new mongoose.Schema({user:{type:mongoose.Schema.Types.ObjectId,ref:'User',required:true},items:[{product:{type:mongoose.Schema.Types.ObjectId,ref:'Product'},name:String,image:String,price:Number,quantity:Number}],shippingAddress:{name:String,line1:String,city:String,state:String,pincode:String,phone:String},subtotal:Number,shipping:Number,total:Number,paymentMethod:{type:String,enum:['cod','razorpay'],default:'cod'},paymentStatus:{type:String,default:'pending'},status:{type:String,enum:['Placed','Processing','Shipped','Delivered','Cancelled'],default:'Placed'},razorpayOrderId:String},{timestamps:true});
+export default mongoose.model('Order',schema);

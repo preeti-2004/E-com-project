@@ -1,0 +1,1 @@
+import {Router} from 'express';import User from '../models/User.js';import {protect,adminOnly} from '../middleware/auth.js';const r=Router();r.get('/',protect,adminOnly,async(req,res)=>res.json(await User.find().select('name email role createdAt')));export default r;
