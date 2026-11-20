@@ -1,6 +1,9 @@
 import {Router} from 'express';import bcrypt from 'bcryptjs';import jwt from 'jsonwebtoken';import crypto from 'crypto';import User from '../models/User.js';import {protect} from '../middleware/auth.js';
 const r=Router();const tokenFor=u=>jwt.sign({id:u._id},process.env.JWT_SECRET,{expiresIn:'7d'});const safe=u=>({id:u._id,name:u.name,email:u.email,role:u.role,skinType:u.skinType,concerns:u.concerns,addresses:u.addresses});
-r.post('/signup',async(req,res)=>{try{const {name,email,password}=req.body;if(!name||!email||!password||password.length<8)return res.status(400).json({message:'Enter your name, email and a password of at least 8 characters'});if(await User.findOne({email}))return res.status(409).json({message:'An account with this email already exists'});const user=await User.create({name,email,password:await bcrypt.hash(password,12)});res.status(201).json({token:tokenFor(user),user:safe(user)});}catch(e){res.status(500).json({message:'Could not create account'});}});
+r.post('/signup',async(req,res)=>{try{const {name,email,password}=req.body;if(!name||!email||!password||password.length<8)return res.status(400).json({message:'Enter your name, email and a password of at least 8 characters'});if(await User.findOne({email}))return res.status(409).json({message:'An account with this email already exists'});const user=await User.create({name,email,password:await bcrypt.hash(password,12)});res.status(201).json({token:tokenFor(user),user:safe(user)});}catch(e){
+  console.error('Signup Error:', e);
+  res.status(500).json({message:'Could not create account'});
+}});
 r.post('/login',async(req,res)=>{const user=await User.findOne({email:req.body.email});if(!user||!await bcrypt.compare(req.body.password||'',user.password))return res.status(401).json({message:'Incorrect email or password'});res.json({token:tokenFor(user),user:safe(user)});});
 r.get('/me',protect,(req,res)=>res.json({user:safe(req.user)}));
 r.put('/me',protect,async(req,res)=>{const {name,skinType,concerns,addresses}=req.body;Object.assign(req.user,{name,skinType,concerns,addresses});await req.user.save();res.json({user:safe(req.user)});});
